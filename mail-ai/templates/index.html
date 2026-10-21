@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail AI — Intelligent Business Email Classification</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="dark-theme">
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Mail <span class="brand-highlight">AI</span></span>
+                    <span class="brand-subtitle">Business Email Classification</span>
+                </div>
+                <span class="pulse-badge">
+                    <span class="pulse-dot"></span> ML Engine Active
+                </span>
+            </div>
+
+            <nav class="nav-links">
+                <a href="#dashboard" class="nav-link active">Dashboard</a>
+                <a href="#classifier" class="nav-link">Live Classifier</a>
+                <a href="#inbox" class="nav-link">Sample Inbox</a>
+                <a href="#workflow" class="nav-link">Workflow</a>
+                <a href="#architecture" class="nav-link">Architecture</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button id="resetDemoBtn" class="btn btn-secondary btn-sm" title="Reset sample database">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    Reset Demo
+                </button>
+                <a href="#classifier" class="btn btn-primary btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Classify Email
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Hero Overview Banner -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-pill">
+                    <span class="badge-accent">College Capstone Project</span>
+                    <span>NLP Machine Learning & Intelligent Triage</span>
+                </div>
+                <h1 class="hero-title">
+                    Intelligent Business Email Classification & Automated Risk Triage
+                </h1>
+                <p class="hero-description">
+                    Empowering enterprise communication with real-time NLP classification. Automatically analyzes inbound emails for 
+                    <strong>Category</strong>, detects <strong>Urgency Level</strong>, scores <strong>Potential Security Risk</strong>, 
+                    and triggers automated department routing with incident SLAs.
+                </p>
+                <div class="hero-tech-stack">
+                    <span class="tech-tag"><span class="tech-dot py"></span> Python Flask</span>
+                    <span class="tech-tag"><span class="tech-dot ml"></span> Scikit-Learn TF-IDF</span>
+                    <span class="tech-tag"><span class="tech-dot db"></span> SQLite 3</span>
+                    <span class="tech-tag"><span class="tech-dot js"></span> Chart.js Visuals</span>
+                    <span class="tech-tag"><span class="tech-dot api"></span> REST API / JSON</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Metrics Grid -->
+        <section id="dashboard" class="section-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Operations Dashboard</h2>
+                    <p class="section-subtitle">Real-time classification telemetry and intelligence metrics</p>
+                </div>
+                <button id="refreshStatsBtn" class="btn btn-ghost btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Total Emails Processed</span>
+                        <div class="metric-icon blue">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="kpiTotalEmails" aria-live="polite">--</div>
+                    <div class="metric-footer">
+                        <span class="metric-trend positive">✓ Live SQLite DB</span>
+                        <span class="metric-subtext">Active store</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Urgent Emails</span>
+                        <div class="metric-icon amber">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="kpiUrgentEmails" aria-live="polite">--</div>
+                    <div class="metric-footer">
+                        <span class="metric-trend alert">Urgent priority</span>
+                        <span class="metric-subtext">Model-assigned</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">High-Risk Predictions</span>
+                        <div class="metric-icon red">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="kpiHighRisk">--</div>
+                    <div class="metric-footer">
+                        <span class="metric-trend danger">Human review</span>
+                        <span class="metric-subtext">Model risk label</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Model Category Accuracy</span>
+                        <div class="metric-icon purple">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 14 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="kpiAccuracy">--%</div>
+                    <div class="metric-footer">
+                        <span class="metric-trend positive">TF-IDF + Logistic Regression</span>
+                        <span class="metric-subtext" id="kpiSampleCount">120+ samples</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div id="dashboardEmptyState" class="dashboard-empty-state" role="status" aria-live="polite" hidden>
+                <h3>No classified emails yet</h3>
+                <p>Classify an email to populate category, priority, and risk distributions.</p>
+            </div>
+            <div id="dashboardCharts" class="charts-grid" role="group" aria-label="Email classification distributions">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">Email Category Distribution</h3>
+                            <p class="chart-subtitle" id="categoryChartDescription">Classified emails by business category</p>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="categoryChart" role="img" aria-label="Doughnut chart of classified emails by category" aria-describedby="categoryChartDescription"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">Priority Level Breakdown</h3>
+                            <p class="chart-subtitle" id="priorityChartDescription">Classified emails by urgent, high, medium, and low priority</p>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="urgencyChart" role="img" aria-label="Bar chart of emails by priority level" aria-describedby="priorityChartDescription"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">Potential Risk Assessment</h3>
+                            <p class="chart-subtitle" id="riskChartDescription">Classified emails by model-assigned risk level</p>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskChart" role="img" aria-label="Doughnut chart of emails by model-assigned risk level" aria-describedby="riskChartDescription"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Email Classifier Playground -->
+        <section id="classifier" class="section-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Live Email Classifier</h2>
+                    <p class="section-subtitle">Test real-time Machine Learning prediction and automated routing recommendations</p>
+                </div>
+            </div>
+
+            <div class="classifier-layout">
+                <!-- Input Form Panel -->
+                <div class="classifier-form-card">
+                    <div class="form-preset-bar">
+                        <label for="samplePresetSelect" class="form-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            Load Sample Business Email:
+                        </label>
+                        <select id="samplePresetSelect" class="form-select">
+                            <option value="">-- Choose a sample scenario to auto-fill --</option>
+                        </select>
+                    </div>
+
+                    <form id="classifyForm" class="email-input-form">
+                        <div class="form-group">
+                            <label for="emailSender" class="form-label">Sender Email Address (Optional)</label>
+                            <input type="email" id="emailSender" class="form-control" placeholder="e.g. devops-lead@enterprise.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailSubject" class="form-label">Email Subject</label>
+                            <input type="text" id="emailSubject" class="form-control" placeholder="e.g. Critical: Database connection timeout in production cluster" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailBody" class="form-label">Email Body Content</label>
+                            <textarea id="emailBody" rows="5" class="form-control textarea" placeholder="Paste or type business email text here..." required></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="classifyBtn" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 14 14"></polyline>
+                                </svg>
+                                Analyze & Classify
+                            </button>
+                            <button type="button" id="saveToInboxBtn" class="btn btn-accent">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                    <polyline points="7 3 7 8 15 8"></polyline>
+                                </svg>
+                                Classify & Save to Inbox
+                            </button>
+                            <button type="button" id="clearFormBtn" class="btn btn-ghost">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Live Results Panel -->
+                <div class="classifier-result-card" id="resultCard">
+                    <!-- Placeholder State -->
+                    <div id="resultPlaceholder" class="result-placeholder">
+                        <div class="pulse-ring">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </div>
+                        <h3>ML Classifier Standby</h3>
+                        <p>Add an email or choose a sample to inspect model predictions, extractive summary, and text signals.</p>
+                    </div>
+
+                    <!-- Active Result State -->
+                    <div id="resultContent" class="result-content hidden">
+                        <div class="result-header">
+                            <span class="result-pill">ML Prediction | Not guaranteed</span>
+                            <span id="resultConfidence" class="confidence-tag">98.5% model score (uncalibrated)</span>
+                        </div>
+
+                        <!-- Core Classification Badges -->
+                        <div class="result-badges-row">
+                            <div class="classification-pill-card">
+                                <span class="card-label">Category</span>
+                                <div id="resultCategory" class="badge-category">Customer Support</div>
+                            </div>
+
+                            <div class="classification-pill-card">
+                                <span class="card-label">Priority</span>
+                                <div id="resultUrgency" class="badge-urgency urgent">Urgent Priority</div>
+                            </div>
+
+                            <div class="classification-pill-card">
+                                <span class="card-label">Risk Level</span>
+                                <div id="resultRisk" class="badge-risk low">Low Risk</div>
+                                <span id="resultRiskNote" class="risk-review-note">Model risk estimate; not a guarantee.</span>
+                            </div>
+                        </div>
+
+                        <div class="email-summary-box">
+                            <span class="phrases-label">Extractive email summary</span>
+                            <p id="resultSummary" class="summary-text"></p>
+                        </div>
+
+                        <div class="model-evidence-box">
+                            <span class="phrases-label">Text features associated with these predictions</span>
+                            <p class="evidence-note">Positive TF-IDF and model-coefficient signals; useful context, not verified facts or proof of why a decision is correct.</p>
+                            <div class="evidence-columns">
+                                <div>
+                                    <span class="card-label">Category signals</span>
+                                    <div id="categoryEvidenceList" class="tags-row"></div>
+                                </div>
+                                <div>
+                                    <span class="card-label">Priority signals</span>
+                                    <div id="priorityEvidenceList" class="tags-row"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Automated Workflow Routing Card -->
+                        <div class="action-recommendation-box">
+                            <div class="action-top">
+                                <div class="action-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 11 12 14 22 4"></polyline>
+                                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="action-label">Suggested workflow action (not executed):</span>
+                                    <h4 id="resultAction" class="action-title">P1 INCIDENT TRIAGE</h4>
+                                </div>
+                            </div>
+                            <p id="resultActionDesc" class="action-desc">Dispatch to Tier 2 on-call technical support with immediate SLA.</p>
+                            <div class="routing-meta">
+                                <div><strong>Target Department:</strong> <span id="resultDept">Technical Support</span></div>
+                                <div><strong>Response SLA:</strong> <span id="resultSLA">&lt; 1 Hour</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Indicators -->
+                        <div id="riskIndicatorsContainer" class="risk-indicators-box hidden">
+                            <span id="riskIndicatorsTitle" class="risk-indicators-title">Potential risk indicators for human review:</span>
+                            <div id="riskIndicatorsList" class="indicators-list"></div>
+                            <p id="riskIndicatorsDisclaimer" class="evidence-note">Keyword and pattern matches are review cues; they do not prove malicious intent.</p>
+                        </div>
+
+                        <!-- Key Influencing Phrases -->
+                        <div class="phrases-box">
+                            <span class="phrases-label">Frequent words in the email (not model evidence):</span>
+                            <div id="resultKeyPhrases" class="tags-row"></div>
+                        </div>
+
+                        <!-- Confidence Probability Breakdown -->
+                        <div class="prob-distribution-box">
+                            <span class="prob-label">Category model probabilities (not calibrated):</span>
+                            <div id="probBarsList" class="prob-bars-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sample Inbox Section -->
+        <section id="inbox" class="section-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Sample Enterprise Inbox</h2>
+                    <p class="section-subtitle">Real-time repository of classified business emails stored in SQLite</p>
+                </div>
+                <div class="inbox-header-actions">
+                    <span id="inboxCountBadge" class="inbox-count-badge">8 Emails</span>
+                </div>
+            </div>
+
+            <!-- Inbox Filters Toolbar -->
+            <div class="inbox-toolbar">
+                <div class="search-input-wrapper">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="inboxSearchInput" class="toolbar-input" placeholder="Search by subject, sender, or content...">
+                </div>
+
+                <select id="filterCategory" class="toolbar-select">
+                    <option value="">All Categories</option>
+                    <option value="Finance">Finance</option>
+                    <option value="HR">HR</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Customer Support">Customer Support</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Security">Security</option>
+                    <option value="General">General</option>
+                </select>
+
+                <select id="filterUrgency" class="toolbar-select">
+                    <option value="">All Priorities</option>
+                    <option value="Urgent">Urgent Priority</option>
+                    <option value="High">High Priority</option>
+                    <option value="Medium">Medium Priority</option>
+                    <option value="Low">Low Priority</option>
+                </select>
+
+                <select id="filterRisk" class="toolbar-select">
+                    <option value="">All Risk Levels</option>
+                    <option value="High">High Risk</option>
+                    <option value="Medium">Medium Risk</option>
+                    <option value="Low">Low Risk</option>
+                </select>
+
+                <select id="filterStatus" class="toolbar-select">
+                    <option value="">All Statuses</option>
+                    <option value="Unread">Unread</option>
+                    <option value="Read">Read</option>
+                    <option value="Escalated">Escalated</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Archived">Archived</option>
+                </select>
+
+                <button id="resetFiltersBtn" class="btn btn-ghost btn-sm">Clear Filters</button>
+            </div>
+
+            <!-- Inbox Table -->
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="inbox-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Sender</th>
+                                <th>Subject & Summary</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Risk</th>
+                                <th>Routing</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inboxTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-4">Loading inbox emails...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Automated Workflow & Architecture Section -->
+        <section id="workflow" class="section-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Automated Triage Workflow</h2>
+                    <p class="section-subtitle">How Mail AI processes, categorizes, and directs corporate email traffic</p>
+                </div>
+            </div>
+
+            <div class="workflow-grid">
+                <div class="workflow-step">
+                    <div class="step-number">01</div>
+                    <div class="step-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Ingestion & Preprocessing</h3>
+                    <p class="step-desc">Normalizes incoming email body & subject, tokenizes text, scrubs URLs and noise, and applies N-Gram TF-IDF representation.</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-number">02</div>
+                    <div class="step-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Multi-Target ML Inference</h3>
+                    <p class="step-desc">TF-IDF features and Logistic Regression models predict business category, priority, and risk level.</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-number">03</div>
+                    <div class="step-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Risk & Threat Heuristics</h3>
+                    <p class="step-desc">Evaluates phishing cues, credential harvesting keywords, unauthorized wire instructions, and overrides risk flags when necessary.</p>
+                </div>
+
+                <div class="workflow-step">
+                    <div class="step-number">04</div>
+                    <div class="step-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Department Routing & SLA</h3>
+                    <p class="step-desc">Routes to target team (IT Security, Tier 2 Support, Finance, Sales) with automated SLA tags and quarantine isolation for threats.</p>
+                </div>
+            </div>
+
+            <!-- Workflow Rules Table -->
+            <div id="architecture" class="rules-card">
+                <h3 class="rules-title">Enterprise Automated Triage Rules</h3>
+                <div class="rules-grid">
+                    <div class="rule-item">
+                        <span class="rule-tag red">Security Rule</span>
+                        <h4>Phishing & Wire Fraud Defense</h4>
+                        <p>IF Risk == <code>High</code> THEN Immediately <strong>QUARANTINE</strong>, lock outbound links, and page InfoSec SOC under 30-min SLA.</p>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-tag amber">Support Rule</span>
+                        <h4>P1 Outage & Incident Escalation</h4>
+                        <p>IF Category == <code>Customer Support</code> AND Urgency == <code>High</code> THEN Escalate to Tier 2 on-call engineer under 1-hour SLA.</p>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-tag blue">Finance Rule</span>
+                        <h4>Billing Suspension Prevention</h4>
+                        <p>IF Category == <code>Billing</code> AND Urgency == <code>High</code> THEN Pause automated tenant lock and route to Accounts Receivable.</p>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-tag green">Sales Rule</span>
+                        <h4>High-Value Inbound Leads</h4>
+                        <p>IF Category == <code>Sales</code> THEN Enrich company intelligence and dispatch Deal assignment to Enterprise AE under 4-hour SLA.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Email Details Modal -->
+    <div id="emailModal" class="modal-backdrop hidden">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalSubject">Email Classification Details</h3>
+                <button type="button" id="closeModalBtn" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Injected via JS -->
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <!-- Action buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p><strong>Mail AI</strong> — Intelligent Business Email Classification | College Engineering Project</p>
+            <p class="footer-sub">Flask • Scikit-Learn • SQLite • Chart.js • REST API</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
