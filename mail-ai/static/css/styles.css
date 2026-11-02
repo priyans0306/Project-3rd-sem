@@ -550,7 +550,7 @@ body.dark-theme {
     gap: 1.5rem;
 }
 
-.classifier-form-card, .classifier-result-card {
+.classifier-form-card, .classifier-result-card, .related-email-card {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -564,6 +564,87 @@ body.dark-theme {
     border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 0.85rem;
+}
+
+.related-email-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.related-email-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.related-email-subtitle {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.related-email-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    max-height: 430px;
+    overflow-y: auto;
+    margin: 1rem 0;
+}
+
+.related-email-option {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+    padding: 0.85rem;
+    text-align: left;
+    color: var(--text-primary);
+    font: inherit;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.related-email-option:hover,
+.related-email-option.selected {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--color-primary);
+}
+
+.related-email-option-title {
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.related-email-option-preview {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.related-email-empty {
+    padding: 1.5rem 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.related-email-analyze {
+    width: 100%;
+    margin-top: auto;
+}
+
+.related-email-analyze:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.form-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .form-group {
@@ -612,6 +693,14 @@ body.dark-theme {
 }
 
 /* Classifier Result Panel */
+.classifier-result-card {
+    grid-column: 1 / -1;
+}
+
+.classifier-result-card.hidden {
+    display: none;
+}
+
 .result-placeholder {
     height: 100%;
     min-height: 380px;

@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let urgencyChartInstance = null;
     let riskChartInstance = null;
     let activePresetMap = {};
+    let presetsByCategory = new Map();
+    let selectedPresetId = null;
     let selectedEmailId = null;
     let classificationInFlight = false;
 
@@ -26,12 +28,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailSender = document.getElementById("emailSender");
     const emailSubject = document.getElementById("emailSubject");
     const emailBody = document.getElementById("emailBody");
-    const samplePresetSelect = document.getElementById("samplePresetSelect");
+    const sampleCategorySelect = document.getElementById("sampleCategorySelect");
+    const relatedEmailList = document.getElementById("relatedEmailList");
+    const analyzeSelectedEmailBtn = document.getElementById("analyzeSelectedEmailBtn");
     const classifyBtn = document.getElementById("classifyBtn");
     const saveToInboxBtn = document.getElementById("saveToInboxBtn");
     const clearFormBtn = document.getElementById("clearFormBtn");
 
     // Result Card Elements
+    const resultCard = document.getElementById("resultCard");
     const resultPlaceholder = document.getElementById("resultPlaceholder");
     const resultContent = document.getElementById("resultContent");
     const resultConfidence = document.getElementById("resultConfidence");
@@ -273,47 +278,102 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const json = await apiRequest("/api/dashboard/presets");
 
-            samplePresetSelect.innerHTML = '<option value="">-- Choose a sample scenario to auto-fill --</option>';
+            sampleCategorySelect.innerHTML = '<option value="">-- Choose a category --</option>';
             activePresetMap = {};
+            presetsByCategory = new Map();
 
             json.data.forEach(preset => {
                 activePresetMap[preset.id] = preset;
-                const opt = document.createElement("option");
-                opt.value = preset.id;
-                opt.textContent = preset.title;
-                samplePresetSelect.appendChild(opt);
+                const category = preset.title.split(":", 1)[0].trim();
+                if (!presetsByCategory.has(category)) {
+                    presetsByCategory.set(category, []);
+                }
+                presetsByCategory.get(category).push(preset);
             });
+
+            [...presetsByCategory.keys()].sort().forEach(category => {
+                const option = document.createElement("option");
+                option.value = category;
+                option.textContent = category;
+                sampleCategorySelect.appendChild(option);
+            });
+
+            renderRelatedEmails();
         } catch (err) {
             console.error("Presets error:", err);
             showToast(err.message, "error");
         }
     }
 
-    samplePresetSelect.addEventListener("change", (e) => {
-        const id = e.target.value;
-        if (!id || !activePresetMap[id]) return;
+    function renderRelatedEmails() {
+        const category = sampleCategorySelect.value;
+        const presets = presetsByCategory.get(category) || [];
+        analyzeSelectedEmailBtn.disabled = !selectedPresetId;
 
-        const p = activePresetMap[id];
-        emailSender.value = p.sender;
-        emailSubject.value = p.subject;
-        emailBody.value = p.body;
-        showToast(`Loaded preset: ${p.title}`, "info");
+        if (!category) {
+            relatedEmailList.innerHTML = '<p class="related-email-empty">Choose a category to see related emails.</p>';
+            return;
+        }
+        if (presets.length === 0) {
+            relatedEmailList.innerHTML = '<p class="related-email-empty">No sample emails are available for this category.</p>';
+            return;
+        }
+
+        relatedEmailList.innerHTML = presets.map(preset => {
+            const title = preset.title.split(":").slice(1).join(":").trim();
+            return `
+                <button type="button" class="related-email-option ${String(preset.id) === selectedPresetId ? "selected" : ""}"
+                    data-preset-id="${escapeHtml(preset.id)}"
+                    aria-pressed="${String(preset.id) === selectedPresetId}">
+                    <span class="related-email-option-title">${escapeHtml(title)}</span>
+                    <span class="related-email-option-preview">${escapeHtml(preset.subject)}</span>
+                </button>
+            `;
+        }).join("");
+    }
+
+    sampleCategorySelect.addEventListener("change", (e) => {
+        selectedPresetId = null;
+        renderRelatedEmails();
+    });
+
+    relatedEmailList.addEventListener("click", (e) => {
+        const option = e.target.closest(".related-email-option");
+        if (!option) return;
+        const preset = activePresetMap[option.dataset.presetId];
+        if (!preset) {
+            showToast("That sample email is no longer available. Refresh and try again.", "error");
+            return;
+        }
+
+        selectedPresetId = String(preset.id);
+        emailSender.value = preset.sender;
+        emailSubject.value = preset.subject;
+        emailBody.value = preset.body;
+        renderRelatedEmails();
+        showToast(`Selected email: ${preset.title}`, "info");
     });
 
     clearFormBtn.addEventListener("click", () => {
         classifyForm.reset();
-        samplePresetSelect.value = "";
+        sampleCategorySelect.value = "";
+        selectedPresetId = null;
+        renderRelatedEmails();
         selectedEmailId = null;
         document.querySelectorAll("#inboxTableBody tr.selected").forEach(row => row.classList.remove("selected"));
         emailModal.classList.add("hidden");
+        resultCard.classList.add("hidden");
         resultContent.classList.add("hidden");
         resultPlaceholder.style.display = "flex";
     });
 
     // --- Render Classification UI ---
-    function renderClassificationResult(data) {
-        resultPlaceholder.style.display = "none";
-        resultContent.classList.remove("hidden");
+    function renderClassificationResult(data, displayOnPage = true) {
+        if (displayOnPage) {
+            resultCard.classList.remove("hidden");
+            resultPlaceholder.style.display = "none";
+            resultContent.classList.remove("hidden");
+        }
 
         const confidence = Number(data.confidence ?? data.category_confidence);
         const conf = Number.isFinite(confidence) ? Math.round(Math.max(0, Math.min(1, confidence)) * 100) : 0;
@@ -436,6 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
         classificationInFlight = true;
         setBusy(classifyBtn, true, "Classifying...");
         setBusy(saveToInboxBtn, true, "Classifying...");
+        setBusy(analyzeSelectedEmailBtn, true, "Classifying...");
         try {
             const json = await apiRequest(endpoint, {
                 method: "POST",
@@ -453,6 +514,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             setBusy(classifyBtn, false);
             setBusy(saveToInboxBtn, false);
+            setBusy(analyzeSelectedEmailBtn, false);
+            analyzeSelectedEmailBtn.disabled = !selectedPresetId;
             classificationInFlight = false;
         }
     }
@@ -466,6 +529,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Save to Inbox Button ---
     saveToInboxBtn.addEventListener("click", async () => {
         await classifyAndSave("/api/emails");
+    });
+
+    analyzeSelectedEmailBtn.addEventListener("click", async () => {
+        await classifyAndSave("/api/emails/classify");
     });
 
     // --- Load Inbox Table ---
@@ -611,7 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const json = await apiRequest(`/api/emails/${emailId}`);
 
             const email = json.data;
-            renderClassificationResult(email);
+            renderClassificationResult(email, false);
             modalSubject.textContent = email.subject;
 
             const confidence = Number(email.confidence ?? email.category_confidence);

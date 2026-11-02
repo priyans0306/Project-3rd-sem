@@ -193,7 +193,16 @@ class TestMailAI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.get_json()
         self.assertTrue(data["success"])
-        self.assertEqual(len(data["data"]), 7)
+        self.assertGreaterEqual(len(data["data"]), 15)
+
+        category_counts = {}
+        for item in data["data"]:
+            category = item["title"].split(":", 1)[0].strip()
+            category_counts[category] = category_counts.get(category, 0) + 1
+
+        self.assertGreaterEqual(len(category_counts), 7)
+        self.assertGreaterEqual(min(category_counts.values()), 3)
+        self.assertGreater(len(set(category_counts.values())), 1)
 
 
 class TestBackendEndpoints(unittest.TestCase):

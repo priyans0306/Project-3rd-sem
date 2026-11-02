@@ -28,9 +28,6 @@
                     <span class="brand-title">Mail <span class="brand-highlight">AI</span></span>
                     <span class="brand-subtitle">Business Email Classification</span>
                 </div>
-                <span class="pulse-badge">
-                    <span class="pulse-dot"></span> ML Engine Active
-                </span>
             </div>
 
             <nav class="nav-links">
@@ -64,10 +61,6 @@
         <!-- Hero Overview Banner -->
         <section class="hero-section">
             <div class="hero-content">
-                <div class="hero-pill">
-                    <span class="badge-accent">College Capstone Project</span>
-                    <span>NLP Machine Learning & Intelligent Triage</span>
-                </div>
                 <h1 class="hero-title">
                     Intelligent Business Email Classification & Automated Risk Triage
                 </h1>
@@ -76,13 +69,6 @@
                     <strong>Category</strong>, detects <strong>Urgency Level</strong>, scores <strong>Potential Security Risk</strong>, 
                     and triggers automated department routing with incident SLAs.
                 </p>
-                <div class="hero-tech-stack">
-                    <span class="tech-tag"><span class="tech-dot py"></span> Python Flask</span>
-                    <span class="tech-tag"><span class="tech-dot ml"></span> Scikit-Learn TF-IDF</span>
-                    <span class="tech-tag"><span class="tech-dot db"></span> SQLite 3</span>
-                    <span class="tech-tag"><span class="tech-dot js"></span> Chart.js Visuals</span>
-                    <span class="tech-tag"><span class="tech-dot api"></span> REST API / JSON</span>
-                </div>
             </div>
         </section>
 
@@ -229,16 +215,12 @@
                 <!-- Input Form Panel -->
                 <div class="classifier-form-card">
                     <div class="form-preset-bar">
-                        <label for="samplePresetSelect" class="form-label">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
-                            Load Sample Business Email:
-                        </label>
-                        <select id="samplePresetSelect" class="form-select">
-                            <option value="">-- Choose a sample scenario to auto-fill --</option>
-                        </select>
+                        <div>
+                            <label for="sampleCategorySelect" class="form-label">Select an email category</label>
+                            <select id="sampleCategorySelect" class="form-select">
+                                <option value="">-- Choose a category --</option>
+                            </select>
+                        </div>
                     </div>
 
                     <form id="classifyForm" class="email-input-form">
@@ -278,8 +260,24 @@
                     </form>
                 </div>
 
-                <!-- Live Results Panel -->
-                <div class="classifier-result-card" id="resultCard">
+                <!-- Related Category Emails -->
+                <div class="related-email-card">
+                    <div class="related-email-header">
+                        <div>
+                            <h3 class="related-email-title">Related sample emails</h3>
+                            <p class="related-email-subtitle">Choose an email to load it into the classifier.</p>
+                        </div>
+                    </div>
+                    <div id="relatedEmailList" class="related-email-list" aria-live="polite">
+                        <p class="related-email-empty">Choose a category to see related emails.</p>
+                    </div>
+                    <button type="button" id="analyzeSelectedEmailBtn" class="btn btn-primary related-email-analyze" disabled>
+                        Analyze &amp; Classify Selected Email
+                    </button>
+                </div>
+
+                <!-- Classification Results -->
+                <div class="classifier-result-card hidden" id="resultCard">
                     <!-- Placeholder State -->
                     <div id="resultPlaceholder" class="result-placeholder">
                         <div class="pulse-ring">
@@ -295,7 +293,7 @@
                     <!-- Active Result State -->
                     <div id="resultContent" class="result-content hidden">
                         <div class="result-header">
-                            <span class="result-pill">ML Prediction | Not guaranteed</span>
+                            <span class="result-pill">Classification result | Model estimate</span>
                             <span id="resultConfidence" class="confidence-tag">98.5% model score (uncalibrated)</span>
                         </div>
 

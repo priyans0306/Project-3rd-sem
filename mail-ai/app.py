@@ -44,6 +44,7 @@ def create_app(config: dict = None) -> Flask:
         if database.count_emails() == 0:
             email_service.reset_demo_inbox()
         else:
+            email_service.ensure_demo_inbox_samples()
             email_service.refresh_legacy_predictions()
     except Exception as exc:
         app.logger.error("Application initialization failed (%s)", type(exc).__name__)

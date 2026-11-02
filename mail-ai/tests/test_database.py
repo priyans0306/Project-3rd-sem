@@ -103,6 +103,23 @@ class TestEmailDatabase(unittest.TestCase):
         self.assertEqual(db.get_email_by_id(email_id)["model_version"], "test-model-v2")
         self.assertEqual(db.get_email_by_id(email_id)["confidence"], 0.93)
 
+    def test_missing_demo_data_is_added_once_without_removing_existing_emails(self):
+        existing_id = db.insert_email(self.email_record(subject="Existing inbox email"))
+        preset = self.email_record(
+            subject="Category sample email",
+            sender="sample@example.com",
+            model_version="sample-model-v1"
+        )
+
+        self.assertEqual(db.insert_missing_demo_data([preset]), 1)
+        self.assertEqual(db.insert_missing_demo_data([preset]), 0)
+        self.assertEqual(db.count_emails(), 2)
+        self.assertIsNotNone(db.get_email_by_id(existing_id))
+        self.assertEqual(
+            db.get_emails(search="Category sample email")[0]["sender"],
+            "sample@example.com"
+        )
+
     def test_filter_search_pagination_count_and_delete(self):
         first_id = db.insert_email(self.email_record(subject="Unique needle alpha"))
         second_id = db.insert_email(self.email_record(

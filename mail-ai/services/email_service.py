@@ -15,6 +15,7 @@ from database.db import (
     count_emails,
     get_dashboard_metrics,
     replace_demo_data,
+    insert_missing_demo_data,
     get_legacy_or_unclassified_emails,
     add_classification
 )
@@ -81,8 +82,7 @@ class EmailService:
             "action_description": prediction["action_description"]
         }
 
-    def reset_demo_inbox(self):
-        """Classify built-in demo text with the active model, then store atomically."""
+    def _classified_demo_records(self):
         records = []
         for preset in DEMO_PRESETS:
             prediction = self.classification_service.classify_email(
@@ -97,7 +97,16 @@ class EmailService:
                 "support@mailai.enterprise.com",
                 prediction
             ))
+        return records
+
+    def reset_demo_inbox(self):
+        """Classify built-in demo text with the active model, then store atomically."""
+        records = self._classified_demo_records()
         replace_demo_data(records)
+
+    def ensure_demo_inbox_samples(self) -> int:
+        """Add any missing built-in sample emails without changing existing inbox rows."""
+        return insert_missing_demo_data(self._classified_demo_records())
 
     def refresh_legacy_predictions(self) -> int:
         """Replace known static migration labels with current model outputs."""

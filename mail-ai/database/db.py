@@ -252,6 +252,30 @@ def replace_demo_data(email_records: List[Dict[str, Any]]):
         conn.close()
 
 
+def insert_missing_demo_data(email_records: List[Dict[str, Any]]) -> int:
+    """Add classified demo emails that are not already present in the inbox."""
+    conn = get_db_connection()
+    inserted = 0
+    try:
+        with conn:
+            conn.execute("BEGIN IMMEDIATE")
+            existing = {
+                (row["subject"], row["sender"])
+                for row in conn.execute("SELECT subject, sender FROM emails")
+            }
+            for email_data in email_records:
+                identity = (email_data.get("subject", ""), email_data.get("sender", ""))
+                if identity in existing:
+                    continue
+                email_id = _insert_email_row(conn, email_data)
+                _insert_classification_row(conn, email_id, email_data)
+                existing.add(identity)
+                inserted += 1
+        return inserted
+    finally:
+        conn.close()
+
+
 def insert_email(email_data: Dict[str, Any]) -> int:
     """Atomically insert an email and, when present, its classification."""
     conn = get_db_connection()
